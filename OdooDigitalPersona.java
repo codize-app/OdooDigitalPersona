@@ -43,8 +43,7 @@ public class OdooDigitalPersona
 		//Odoo POST
         System.out.println("Odoo Post");
 		try{
-			//URL url = new URL ("http://localhost:8069/dp/api/get_connection");
-			URL url = new URL("http://localhost:8069/odoo-api/common/version");
+			URL url = new URL ("http://localhost:8069/dp/api/get_connection");
 			String urlParameters = "{}";
 			byte[] postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
 			int postDataLength = postData.length;

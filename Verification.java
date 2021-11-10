@@ -96,8 +96,6 @@ public class Verification
 		if(null != evt.capture_result){
 			if(null != evt.capture_result.image && Reader.CaptureQuality.GOOD == evt.capture_result.quality){
 
-				System.out.println(evt.capture_result.image);
-
 				//extract features
 				Engine engine = UareUGlobal.GetEngine();
 					

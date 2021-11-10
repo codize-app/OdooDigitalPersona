@@ -7,6 +7,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
@@ -27,6 +28,8 @@ import java.awt.image.BufferedImage;
 import java.util.Base64;
 import java.nio.file.Files;
 import javax.xml.bind.DatatypeConverter;
+import java.nio.file.Paths;
+import java.util.Arrays;
 
 import com.digitalpersona.uareu.*;
 import com.digitalpersona.uareu.Fid.Fiv;
@@ -39,6 +42,7 @@ public class Capture
 	private static final String ACT_BACK = "back";
 
 	private JDialog       m_dlgParent;
+	private JTextField    textField;
 	private CaptureThread m_capture;
 	private Reader        m_reader;
 	private ImagePanel    m_image;
@@ -53,6 +57,9 @@ public class Capture
 		final int vgap = 5;
 		BoxLayout layout = new BoxLayout(this, BoxLayout.Y_AXIS);
 		setLayout(layout);
+
+		textField = new JTextField();
+		add(textField);
 
 		m_image = new ImagePanel();
 		Dimension dm = new Dimension(400, 500);
@@ -98,12 +105,68 @@ public class Capture
 					if(m_bStreaming && (Reader.CaptureQuality.GOOD == evt.capture_result.quality || Reader.CaptureQuality.NO_FINGER == evt.capture_result.quality)) bGoodImage = true;
 					if(!m_bStreaming && Reader.CaptureQuality.GOOD == evt.capture_result.quality) bGoodImage = true;
 				}
-				if(bGoodImage){
-					//display image
-					System.out.println(evt.capture_result.image);
-					System.out.println(evt.capture_result.image.getCbeffId());
-					System.out.println(evt.capture_result.image.getData());
+				if (bGoodImage) {
 					m_image.showImage(evt.capture_result.image);
+					try{
+						Fmd uue = UareUGlobal.GetEngine().CreateFmd(evt.capture_result.image, Fmd.Format.ANSI_378_2004);
+						String s = Base64.getEncoder().encodeToString(uue.getData());
+						System.out.println(s);
+
+						try{
+							URL url = new URL("http://localhost:8069/dp/api/save_fingerprint");
+							String urlParameters = "{\"params\":{\"binary\":\"" + s + "\", \"badge\":\"" + textField.getText() + "\"}}";
+							byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+							int postDataLength = postData.length;
+							try {
+								System.out.println(url);
+								HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+								conn.setDoOutput( true );
+								conn.setInstanceFollowRedirects(false);
+								conn.setRequestMethod("POST");
+								conn.setRequestProperty("Content-Type", "application/json"); 
+								conn.setRequestProperty("charset", "utf-8");
+								conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+								conn.setUseCaches(false);
+								try( DataOutputStream wr = new DataOutputStream( conn.getOutputStream())) {
+									wr.write(postData);
+								}
+								BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+								System.out.println(in.readLine());
+							} catch(IOException io) {
+								System.out.println(io);
+							}
+						}catch(MalformedURLException ex){
+							System.out.println(ex);
+						}
+
+						/*byte[] decode = Base64.getDecoder().decode(s);
+						System.out.println(decode);
+						Fmd buue = UareUGlobal.GetImporter().ImportFmd(decode, Fmd.Format.ANSI_378_2004, Fmd.Format.ANSI_378_2004);
+						System.out.println(buue.getData());
+						int falsematch_rate = UareUGlobal.GetEngine().Compare(uue, 0, buue, 0);
+						System.out.println(falsematch_rate);*/
+
+					} catch(UareUException eua){
+							System.out.println(eua);
+					}
+					/*try{
+						String b64 = new String(Files.readAllBytes(Paths.get("demo.txt")));
+						try{
+							Fmd uue = UareUGlobal.GetEngine().CreateFmd(evt.capture_result.image, Fmd.Format.ANSI_378_2004);
+							if(UareUGlobal.GetEngine().Compare(uue, 0, uue, 0) < 21474) {
+                            	System.out.println("Son el Mismo");
+                        	}
+						}
+						catch(UareUException eua){
+							System.out.println(eua);
+						}
+					} catch(IOException io) {
+						System.out.println(io);
+					}*/
+					//display image
+					/*System.out.println(evt.capture_result.image);
+					System.out.println(evt.capture_result.image.getCbeffId());
+					System.out.println(evt.capture_result.image.getData());*/
 				}
 				else if(Reader.CaptureQuality.CANCELED == evt.capture_result.quality){
 					//capture or streaming was canceled, just quit
