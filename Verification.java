@@ -10,6 +10,24 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import java.net.HttpURLConnection;
+import java.net.ProtocolException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.DataOutputStream;
+import javax.imageio.ImageIO;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.awt.image.BufferedImage;
+
+import java.util.Base64;
+
 import com.digitalpersona.uareu.*;
 
 public class Verification 
@@ -27,6 +45,8 @@ public class Verification
 	
 	private final String m_strPrompt1 = "Verification started\n    put any finger on the reader\n\n";
 	private final String m_strPrompt2 = "    put the same or any other finger on the reader\n\n";
+
+	private String[] fids;
 
 	private Verification(Reader reader){
 		m_reader = reader;
@@ -55,6 +75,8 @@ public class Verification
 		add(Box.createVerticalStrut(vgap));
 
 		setOpaque(true);
+
+		fids = OdooDigitalPersona.fids;
 	}
 
 	public void actionPerformed(ActionEvent e){
@@ -98,15 +120,67 @@ public class Verification
 
 				//extract features
 				Engine engine = UareUGlobal.GetEngine();
+
+				for (int i = 0; i < fids.length; i++) {
+					String[] as = fids[i].split(",");
+					System.out.println(as[0]);
+					System.out.println(as[1]);
+
+					try{
+						if (as[0].length() > 3) {
+							Fmd uue = UareUGlobal.GetEngine().CreateFmd(evt.capture_result.image, Fmd.Format.ANSI_378_2004);
+							byte[] decode = Base64.getDecoder().decode(as[0]);
+							Fmd buue = UareUGlobal.GetImporter().ImportFmd(decode, Fmd.Format.ANSI_378_2004, Fmd.Format.ANSI_378_2004);
+
+							int target_falsematch_rate = Engine.PROBABILITY_ONE / 100000;
+							int falsematch_rate = UareUGlobal.GetEngine().Compare(uue, 0, buue, 0);
+							
+							if(falsematch_rate < target_falsematch_rate) {
+								m_text.append("Concidencia con: " + as[1] + "\n");
+
+								try{
+									URL url = new URL ("http://localhost:8069/dp/api/hr_check");
+									String urlParameters = "{\"params\":{\"badge\":\"" + as[1] + "\"}}";
+									byte[] postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
+									int postDataLength = postData.length;
+									try {
+										System.out.println(url);
+										HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+										conn.setDoOutput( true );
+										conn.setInstanceFollowRedirects( false );
+										conn.setRequestMethod("POST");
+										conn.setRequestProperty("Content-Type", "application/json"); 
+										conn.setRequestProperty("charset", "utf-8");
+										conn.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+										conn.setUseCaches(false);
+										try( DataOutputStream wr = new DataOutputStream( conn.getOutputStream())) {
+											wr.write(postData);
+										}
+										BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+										System.out.println(in.readLine());
+									} catch(IOException io) {
+										System.out.println(io);
+										MessageBox.Warning("Algo salió mal: " + io);
+									}
+								}catch(MalformedURLException ex){
+									System.out.println(ex);
+								}
+
+								break;
+							}
+						}
+					}
+					catch(UareUException e){ MessageBox.DpError("Engine.CreateFmd()", e); }
+				}
 					
-				try{
+				/*try{
 					Fmd fmd = engine.CreateFmd(evt.capture_result.image, Fmd.Format.ANSI_378_2004);
 					if(null == m_fmds[0]) m_fmds[0] = fmd;
 					else if(null == m_fmds[1]) m_fmds[1] = fmd;
 				}
-				catch(UareUException e){ MessageBox.DpError("Engine.CreateFmd()", e); }
+				catch(UareUException e){ MessageBox.DpError("Engine.CreateFmd()", e); }*/
 					
-				if(null != m_fmds[0] &&  null != m_fmds[1]){
+				/*if(null != m_fmds[0] &&  null != m_fmds[1]){
 					//perform comparison
 					try{
 						int falsematch_rate = engine.Compare(m_fmds[0], 0, m_fmds[1], 0);
@@ -135,7 +209,7 @@ public class Verification
 				else{
 					//the loop continues
 					m_text.append(m_strPrompt2);
-				}
+				}*/
 			}
 			else if(Reader.CaptureQuality.CANCELED == evt.capture_result.quality){
 				//capture or streaming was canceled, just quit

@@ -73,6 +73,8 @@ public class Capture
 		btnBack.addActionListener(this);
 		add(btnBack);
 		add(Box.createVerticalStrut(vgap));
+
+		System.out.println(OdooDigitalPersona.fids); 
 	}
 	
 	private void StartCaptureThread(){

@@ -37,6 +37,8 @@ public class OdooDigitalPersona
 	
 	private ReaderCollection m_collection;
 	private Reader           m_reader;
+
+	public static String[] fids;
 	
 	private OdooDigitalPersona(){
 
@@ -61,7 +63,9 @@ public class OdooDigitalPersona
 					wr.write(postData);
 				}
 				BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-				System.out.println(in.readLine());
+				String s = in.readLine();
+				String sub = s.substring(s.indexOf("\"fids\":") + 8, s.indexOf("}}"));
+				fids = sub.replaceAll("\"", "").split(";");
 			} catch(IOException io) {
 				System.out.println(io);
 				MessageBox.Warning("No es posible conectarse a Odoo: " + io);
