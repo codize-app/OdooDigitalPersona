@@ -9,11 +9,11 @@ In order to use the Java App OdooDigitalPersona you need a Digital Persona Devic
 
 Add the Java libraries (.jar) for connection with Digital Persona Device on folder lib/java. The Libraries can be found on oficial Digital Persona SDK, these are:
 
-`dpjavapos`
-`dpuareu`
-`jpos113`
-`xercesImpl-2.6.2`
-`xmlParserAPIs`
+- `dpjavapos`
+- `dpuareu`
+- `jpos113`
+- `xercesImpl-2.6.2`
+- `xmlParserAPIs`
 
 Then, edit the file OdooDigitalPersona.java. Search the variable odooUrl and replace it content by your Odoo Server URL.
 Execute the file `build.bat` for build your own App.
