@@ -47,6 +47,8 @@ public class Capture
 	private Reader        m_reader;
 	private ImagePanel    m_image;
 	private boolean       m_bStreaming;
+
+	private String odooUrl;
 	
 	private Capture(Reader reader, boolean bStreaming){
 		m_reader = reader;
@@ -74,7 +76,7 @@ public class Capture
 		add(btnBack);
 		add(Box.createVerticalStrut(vgap));
 
-		System.out.println(OdooDigitalPersona.fids); 
+		odooUrl = OdooDigitalPersona.odooUrl;
 	}
 	
 	private void StartCaptureThread(){
@@ -115,7 +117,7 @@ public class Capture
 						System.out.println(s);
 
 						try{
-							URL url = new URL("http://localhost:8069/dp/api/save_fingerprint");
+							URL url = new URL(odooUrl + "/dp/api/save_fingerprint");
 							String urlParameters = "{\"params\":{\"binary\":\"" + s + "\", \"badge\":\"" + textField.getText() + "\"}}";
 							byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 							int postDataLength = postData.length;

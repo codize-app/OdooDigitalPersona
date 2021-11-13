@@ -3,6 +3,7 @@ import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.BorderLayout;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.MalformedURLException;
@@ -39,13 +40,15 @@ public class OdooDigitalPersona
 	private Reader           m_reader;
 
 	public static String[] fids;
+	public static String odooUrl;
 	
 	private OdooDigitalPersona(){
 
 		//Odoo POST
         System.out.println("Odoo Post");
+		odooUrl = "http://localhost:8069";
 		try{
-			URL url = new URL ("http://localhost:8069/dp/api/get_connection");
+			URL url = new URL (odooUrl + "/dp/api/get_connection");
 			String urlParameters = "{}";
 			byte[] postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
 			int postDataLength = postData.length;
@@ -75,7 +78,7 @@ public class OdooDigitalPersona
 		}
 		// End Odoo POST
 
-		final int vgap = 5;
+		final int vgap = 8;
 		final int width = 300;
 		
 		BoxLayout layout = new BoxLayout(this, BoxLayout.PAGE_AXIS);
@@ -143,6 +146,10 @@ public class OdooDigitalPersona
 		btnExit.setActionCommand(ACT_EXIT);
 		btnExit.addActionListener(this);
 		add(btnExit);
+		add(Box.createVerticalStrut(vgap));
+
+		JLabel copy = new JLabel("powered by Exemax-Codize", SwingConstants.CENTER);
+		add(copy);
 		add(Box.createVerticalStrut(vgap));
 
 		setOpaque(true);

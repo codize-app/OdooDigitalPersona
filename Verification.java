@@ -47,6 +47,7 @@ public class Verification
 	private final String m_strPrompt2 = "    put the same or any other finger on the reader\n\n";
 
 	private String[] fids;
+	private String odooUrl;
 
 	private Verification(Reader reader){
 		m_reader = reader;
@@ -68,7 +69,8 @@ public class Verification
 		
 		add(Box.createVerticalStrut(vgap));
 		
-		JButton btnBack = new JButton("Back");
+		JButton btnBack = new JButton("Volver");
+		btnBack.setContentAreaFilled(false);
 		btnBack.setActionCommand(ACT_BACK);
 		btnBack.addActionListener(this);
 		add(btnBack);
@@ -77,6 +79,7 @@ public class Verification
 		setOpaque(true);
 
 		fids = OdooDigitalPersona.fids;
+		odooUrl = OdooDigitalPersona.odooUrl;
 	}
 
 	public void actionPerformed(ActionEvent e){
@@ -139,7 +142,7 @@ public class Verification
 								m_text.append("Concidencia con: " + as[1] + "\n");
 
 								try{
-									URL url = new URL ("http://localhost:8069/dp/api/hr_check");
+									URL url = new URL (odooUrl + "/dp/api/hr_check");
 									String urlParameters = "{\"params\":{\"badge\":\"" + as[1] + "\"}}";
 									byte[] postData = urlParameters.getBytes( StandardCharsets.UTF_8 );
 									int postDataLength = postData.length;
@@ -172,44 +175,6 @@ public class Verification
 					}
 					catch(UareUException e){ MessageBox.DpError("Engine.CreateFmd()", e); }
 				}
-					
-				/*try{
-					Fmd fmd = engine.CreateFmd(evt.capture_result.image, Fmd.Format.ANSI_378_2004);
-					if(null == m_fmds[0]) m_fmds[0] = fmd;
-					else if(null == m_fmds[1]) m_fmds[1] = fmd;
-				}
-				catch(UareUException e){ MessageBox.DpError("Engine.CreateFmd()", e); }*/
-					
-				/*if(null != m_fmds[0] &&  null != m_fmds[1]){
-					//perform comparison
-					try{
-						int falsematch_rate = engine.Compare(m_fmds[0], 0, m_fmds[1], 0);
-							
-						int target_falsematch_rate = Engine.PROBABILITY_ONE / 100000; //target rate is 0.00001
-						if(falsematch_rate < target_falsematch_rate){
-							m_text.append("Fingerprints matched.\n");
-							String str = String.format("dissimilarity score: 0x%x.\n", falsematch_rate);
-							m_text.append(str);
-							str = String.format("false match rate: %e.\n\n\n", (double)(falsematch_rate / Engine.PROBABILITY_ONE));
-							m_text.append(str);
-						}
-						else{
-							m_text.append("Fingerprints did not match.\n\n\n");
-						}
-					}
-					catch(UareUException e){ MessageBox.DpError("Engine.CreateFmd()", e); }
-						
-					//discard FMDs
-					m_fmds[0] = null;
-					m_fmds[1] = null;
-
-					//the new loop starts
-					m_text.append(m_strPrompt1);
-				}
-				else{
-					//the loop continues
-					m_text.append(m_strPrompt2);
-				}*/
 			}
 			else if(Reader.CaptureQuality.CANCELED == evt.capture_result.quality){
 				//capture or streaming was canceled, just quit

@@ -36,7 +36,7 @@ public class Selection
 		setLayout(layout);
 		
 		add(Box.createVerticalStrut(vgap));
-		JLabel lblReader = new JLabel("Available readers:");
+		JLabel lblReader = new JLabel("Lectores DP Disponibles:");
 		add(lblReader);
 		add(Box.createVerticalStrut(vgap));
 		
@@ -46,19 +46,22 @@ public class Selection
 		add(paneReaders);
 		add(Box.createVerticalStrut(vgap));
 		
-		JButton btnRefresh = new JButton("Refresh list");
+		JButton btnRefresh = new JButton("Recargar lista");
+		btnRefresh.setContentAreaFilled(false);
 		btnRefresh.setActionCommand(ACT_REFRESH);
 		btnRefresh.addActionListener(this);
 		add(btnRefresh);
 		add(Box.createVerticalStrut(vgap));
 
-		JButton btnGetCaps = new JButton("Get reader capabilities");
+		JButton btnGetCaps = new JButton("Ver datos del lector");
+		btnGetCaps.setContentAreaFilled(false);
 		btnGetCaps.setActionCommand(ACT_GETCAPS);
 		btnGetCaps.addActionListener(this);
 		add(btnGetCaps);
 		add(Box.createVerticalStrut(vgap));
 
-		JButton btnBack = new JButton("Back");
+		JButton btnBack = new JButton("Volver");
+		btnBack.setContentAreaFilled(false);
 		btnBack.setActionCommand(ACT_BACK);
 		btnBack.addActionListener(this);
 		add(btnBack);
